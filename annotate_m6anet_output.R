@@ -1,5 +1,5 @@
 # execute as:
-# Rscript annotate_m6anet_output.R high_confidence_modification_sites_from_m6anet.csv gencode.gtf
+# Rscript annotate_m6anet_output.R high_confidence_modification_sites_from_m6anet.csv gencode.gtf output_prefix
 
 suppressPackageStartupMessages({
   library(tidyverse)
@@ -15,6 +15,7 @@ args <- commandArgs(trailingOnly = TRUE)
 # command line variables
 modification_sites <- fread(args[1])
 gtf_file <- args[2]
+out_pref <- args[3]
 
 # import gtf as txdb
 txdb <- makeTxDbFromGFF(file = gtf_file, format = "gtf")
@@ -133,9 +134,10 @@ annotated_modification_sites <- modification_sites %>%
 # remove 'output_' from column names
 names(annotated_modification_sites) <- gsub("^output_", "", names(annotated_modification_sites))
 
-# add in transcript biotypes
+# merge in transcript biotypes
 annotated_modification_sites <- merge(annotated_modification_sites, rtrack_df, by="transcript_id", all.x=T, all.y=F)
 
-write.csv(annotated_modification_sites, "annotated_modification_sites.csv", row.names=F, quote=F)
+# export
+write.csv(annotated_modification_sites, paste0(out_pref, "_annotated_modification_sites.csv"), row.names=F, quote=F)
 
 message("Annotated modification sites")
